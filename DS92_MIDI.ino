@@ -2,7 +2,7 @@
 #include "Controller.h"
 #include <LiquidCrystal.h>		// importa libreria para lcd
 
-//LiquidCrystal lcd(7, 6, 5, 4, 3, 2);	// pines RS, E, D4, D5, D6, D7 de modulo 1602A
+LiquidCrystal lcd(7, 6, 5, 4, 3, 2);	// pines RS, E, D4, D5, D6, D7 de modulo 1602A
 
 /*************************************************************
   MIDI CONTROLLER
@@ -21,7 +21,7 @@ MIDI_CREATE_DEFAULT_INSTANCE();
 //---How many buttons are connected directly to pins?---------
 byte NUMBER_BUTTONS = 3;
 //---How many potentiometers are connected directly to pins?--
-byte NUMBER_POTS = 1;
+byte NUMBER_POTS = 0;
 //---How many buttons are connected to a multiplexer?---------
 byte NUMBER_MUX_BUTTONS = 0;
 //---How many potentiometers are connected to a multiplexer?--
@@ -44,7 +44,7 @@ byte NUMBER_MUX_POTS = 0;
 //Pot (Pin Number, Command, CC Control, Channel Number)
 //**Command parameter is for future use**
 
-Pot PO1(A0, 0, 11, 1);
+//Pot PO1(A0, 0, 11, 1);
 //Pot PO2(A1, 0, 12, 1);
 //Pot PO3(A2, 0, 13, 1);
 //Pot PO4(A3, 0, 14, 1);
@@ -52,7 +52,7 @@ Pot PO1(A0, 0, 11, 1);
 //Pot PO6(A5, 0, 31, 1);
 //*******************************************************************
 //Add pots used to array below like this->  Pot *POTS[] {&PO1, &PO2, &PO3, &PO4, &PO5, &PO6};
-Pot *POTS[]{&PO1}; //, &PO2, &PO3, &PO4, &PO5};
+Pot *POTS[]{}; //&PO1, &PO2, &PO3, &PO4, &PO5};
 //*******************************************************************
 
 
@@ -130,6 +130,7 @@ Button *MUXBUTTONS[]{};
 Pot *MUXPOTS[]{};
 //*******************************************************************
 
+int lcd_time = 0;
 
 void setup() {
 
@@ -138,34 +139,36 @@ void setup() {
   Serial.begin(115200);
 
   //LCD
-  //lcd.begin(16, 2);			// inicializa a display de 16 columnas y 2 lineas
+  lcd.begin(16, 2);			// inicializa a display de 16 columnas y 2 lineas
 }
 
 void loop() {
+  int time = millis()/1000;
+
+  //LCD
+  if (time < 4) {
+   lcd.setCursor(6, 0);			// ubica cursor en columna 6, linea 0
+   lcd.print("DS92");
+   lcd.setCursor(0, 1);			// ubica cursor en columna 0, linea 1
+   lcd.print("PROPATO - T.MIDI");	// escribe el texto en pantalla 
+  } else if (time == 4){
+    lcd.clear();
+  } else if (time > lcd_time + 1) {
+    lcd.setCursor(0, 0);
+    lcd.print("Han pasado");	// escribe el texto en pantalla
+    lcd.setCursor(0, 1);			// ubica cursor en columna 0, linea 1
+    lcd.print(time);		// escribe valor en segundos devuelto por funcion millis()
+    lcd.print(" seg.");			// imprime a continuacion segundos
+  }
 
   //MIDI
   if (NUMBER_BUTTONS != 0) updateButtons();
   if (NUMBER_POTS != 0) updatePots();
   if (NUMBER_MUX_BUTTONS != 0) updateMuxButtons();
   if (NUMBER_MUX_POTS != 0) updateMuxPots();
-/*
-  //LCD
-  if (millis()/1000 < 4) {
-   lcd.setCursor(6, 0);			// ubica cursor en columna 6, linea 0
-   lcd.print("DS92");
-   lcd.setCursor(0, 1);			// ubica cursor en columna 0, linea 1
-   lcd.print("PROPATO - T.MIDI");	// escribe el texto en pantalla 
-  } else if (millis()/1000 == 4){
-    lcd.clear();
-  } else {
-    lcd.setCursor(0, 0);
-    lcd.print("Han pasado");	// escribe el texto en pantalla
-    lcd.setCursor(0, 1);			// ubica cursor en columna 0, linea 1
-    lcd.print(millis() / 1000);		// escribe valor en segundos devuelto por funcion millis()
-    lcd.print(" seg.");			// imprime a continuacion segundos
-  }
 
-  /*
+
+/*  
   for (int i = 0; i < NUMBER_POTS; i = i + 1) {
    if (POTS[i]->getValue() != 255) {
      byte lcd_message = POTS[i]->getValue();
@@ -182,11 +185,16 @@ void loop() {
      lcd.print(lcd_message);	// escribe la variable en pantalla
      }
   }
-  */
-  
+*/  
 }
 
-
+void updateLCD(int i) {
+          lcd_time = millis()/1000;
+          lcd.clear();
+          lcd.print(BUTTONS[i]->Bchannel);
+          lcd.setCursor(0, 1);
+          lcd.print(BUTTONS[i]->Bvalue);
+}
 //*****************************************************************
 void updateButtons() {
 
@@ -199,16 +207,20 @@ void updateButtons() {
       switch (BUTTONS[i]->Bcommand) {
         case 0:  //Note
           MIDI.sendNoteOn(BUTTONS[i]->Bvalue, 127, BUTTONS[i]->Bchannel);
+          updateLCD(i);
           break;
         case 1:  //CC
           MIDI.sendControlChange(BUTTONS[i]->Bvalue, 127, BUTTONS[i]->Bchannel);
+          updateLCD(i);
           break;
         case 2:  //Toggle
           if (BUTTONS[i]->Btoggle == 0) {
             MIDI.sendControlChange(BUTTONS[i]->Bvalue, 127, BUTTONS[i]->Bchannel);
+            updateLCD(i);
             BUTTONS[i]->Btoggle = 1;
           } else if (BUTTONS[i]->Btoggle == 1) {
             MIDI.sendControlChange(BUTTONS[i]->Bvalue, 0, BUTTONS[i]->Bchannel);
+            updateLCD(i);
             BUTTONS[i]->Btoggle = 0;
           }
           break;
@@ -220,9 +232,11 @@ void updateButtons() {
       switch (BUTTONS[i]->Bcommand) {
         case 0:
           MIDI.sendNoteOff(BUTTONS[i]->Bvalue, 0, BUTTONS[i]->Bchannel);
+          updateLCD(i);
           break;
         case 1:
           MIDI.sendControlChange(BUTTONS[i]->Bvalue, 0, BUTTONS[i]->Bchannel);
+          updateLCD(i);
           break;
       }
     }
