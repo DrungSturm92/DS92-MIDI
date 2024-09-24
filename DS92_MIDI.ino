@@ -130,11 +130,12 @@ Button *MUXBUTTONS[]{};
 Pot *MUXPOTS[]{};
 //*******************************************************************
 
+//Init LCD variables
 int lcd_time = 0;
 char lcd_message1[17];
 char lcd_message2[17];
-int lcd_CHN;
-int lcd_VAL;
+// int lcd_CHN;
+// int lcd_VAL;
 
 
 void setup() {
@@ -148,24 +149,24 @@ void setup() {
 }
 
 void loop() {
-  int time = millis()/1000;
+  int time = millis()/1000;		// seconds.
 
   //LCD
-  if (time < 4) {
+  if (time < 4) {			// Mensaje de bienvenida
    lcd.setCursor(6, 0);			// ubica cursor en columna 6, linea 0
-   lcd.print("DS92");
+   lcd.print("DS92");			
    lcd.setCursor(0, 1);			// ubica cursor en columna 0, linea 1
    lcd.print("PROPATO - T.MIDI");	// escribe el texto en pantalla 
   } else if (time == 4){
     lcd.clear();
-  } else if (time > lcd_time + 2) {
+  } else if (time > lcd_time + 2) {	// 
     lcd.setCursor(0, 0);
     //lcd.print("Han pasado");	// escribe el texto en pantalla
-    snprintf(lcd_message1, 17, "%-17s", "Han pasado");
+    snprintf(lcd_message1, 17, "%-17s", "Han pasado"); // lcd_message1 = han pasado pero rellena con espacios en blanco a la derecha.
     lcd.print(lcd_message1);
     lcd.setCursor(0, 1);			// ubica cursor en columna 0, linea 1
-    snprintf(lcd_message2, 17, "%i %-17s",time, "seg.");
-    lcd.print(lcd_message2);		// escribe valor en segundos devuelto por funcion millis()
+    snprintf(lcd_message2, 17, "%i %-17s",time, "seg."); //  lcd_message2 = time seg. pero rellena con espacios en blanco a la derecha. 
+    lcd.print(lcd_message2);		
     //lcd.print(" seg.");			// imprime a continuacion segundos
   }
 
@@ -197,12 +198,12 @@ void loop() {
 }
 
 void updateLCD() { //(int i, int lcd_CHN, int lcd_VAL) {
-          lcd_time = millis()/1000;
+          lcd_time = millis()/1000;	//tiempo en que se envía un mensaje MIDI
           //snprintf(lcd_message1, 17, "CHN:%2i  VAL:%3i", lcd_CHN, lcd_VAL);
           //lcd.print(BUTTONS[i]->Bchannel);
           //lcd.setCursor(0, 1);
           //lcd.print(BUTTONS[i]->Bvalue);
-	  if (lcd_time > 4) {
+	  if (lcd_time > 4) {	// sólo imprime pasados los 4 segundos del mensaje de bienvenida.
             lcd.clear();
             lcd.print(lcd_message1);
             lcd.setCursor(0,1);
