@@ -147,7 +147,7 @@ byte Pot::getValue()
 {
   _value = analogRead(_pin);
   int tmp = (_oldValue - _value);
-  if (tmp >= 10 || tmp <= -10) {
+  if (tmp >= 8 || tmp <= -8) {
     _oldValue = _value >> 3;
     _oldValue = _oldValue << 3;
     return _value >> 3;
