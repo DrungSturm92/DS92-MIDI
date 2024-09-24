@@ -158,7 +158,7 @@ void loop() {
    lcd.print("PROPATO - T.MIDI");	// escribe el texto en pantalla 
   } else if (time == 4){
     lcd.clear();
-  } else if (time > lcd_time + 1) {
+  } else if (time > lcd_time + 2) {
     lcd.setCursor(0, 0);
     //lcd.print("Han pasado");	// escribe el texto en pantalla
     snprintf(lcd_message1, 17, "%-17s", "Han pasado");
@@ -198,14 +198,16 @@ void loop() {
 
 void updateLCD() { //(int i, int lcd_CHN, int lcd_VAL) {
           lcd_time = millis()/1000;
-          lcd.clear();
           //snprintf(lcd_message1, 17, "CHN:%2i  VAL:%3i", lcd_CHN, lcd_VAL);
           //lcd.print(BUTTONS[i]->Bchannel);
           //lcd.setCursor(0, 1);
           //lcd.print(BUTTONS[i]->Bvalue);
-          lcd.print(lcd_message1);
-          lcd.setCursor(0,1);
-          lcd.print(lcd_message2);
+	  if (lcd_time > 4) {
+            lcd.clear();
+            lcd.print(lcd_message1);
+            lcd.setCursor(0,1);
+            lcd.print(lcd_message2);
+          }
 }
 //*****************************************************************
 void updateButtons() {
