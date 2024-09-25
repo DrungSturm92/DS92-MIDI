@@ -318,7 +318,7 @@ void updatePots() {
     byte potmessage = POTS[i]->getValue();
     if (potmessage != 255) {
       MIDI.sendControlChange(POTS[i]->Pcontrol, potmessage, POTS[i]->Pchannel);
-      snprintf(lcd_message1, 17, "POT:%2i  VAL:%3i", i+1, potmessage);
+      snprintf(lcd_message1, 17, "POT:%2i  VAL:%3i ", i+1, potmessage);
       snprintf(lcd_message2, 17, "CHN:%2i  CC:%4i", POTS[i]->Pchannel, POTS[i]->Pcontrol);       
       updateLCD();
     }
